@@ -1,11 +1,3 @@
-
-##### 安装：
-```
-flutter pub add xb_scaffold
-```
-
-##### 使用：
-```
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
@@ -161,5 +153,3 @@ class Cell extends StatelessWidget {
     );
   }
 }
-
-```
