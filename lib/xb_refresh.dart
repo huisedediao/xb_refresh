@@ -5,6 +5,11 @@ import 'xb_refresh_footer.dart';
 import 'xb_refresh_header.dart';
 import 'xb_refresh_controller.dart';
 
+export 'xb_refresh_config.dart';
+export 'xb_refresh_footer.dart';
+export 'xb_refresh_header.dart';
+export 'xb_refresh_controller.dart';
+
 class XBRefresh extends StatefulWidget {
   final Widget child;
   final VoidCallback? onBeginRefresh;
@@ -86,6 +91,15 @@ class XBRefreshState extends State<XBRefresh> {
       controller.loadMoreKey.currentState?.receiveOffset(
           _controller.offset, _controller.position.maxScrollExtent);
     }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_controllerListen);
+    if (childIsScrollView == false) {
+      _controller.dispose();
+    }
+    super.dispose();
   }
 
   @override
