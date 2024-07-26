@@ -75,6 +75,11 @@ class XBRefreshState extends State<XBRefresh> {
   void initState() {
     super.initState();
     controller = widget.controller;
+
+    _setupScrollController();
+  }
+
+  _setupScrollController() {
     if (childIsScrollView) {
       final controller = (widget.child as ScrollView).controller;
       assert(controller != null,
@@ -104,6 +109,19 @@ class XBRefreshState extends State<XBRefresh> {
       _controller.dispose();
     }
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant XBRefresh oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.child != widget.child) {
+      /// 移除监听
+      _controller.removeListener(_controllerListen);
+      if (oldWidget.child is! ScrollView) {
+        _controller.dispose();
+      }
+      _setupScrollController();
+    }
   }
 
   @override
