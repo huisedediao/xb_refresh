@@ -1,9 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:flutter/material.dart';
 import 'package:xb_scaffold/xb_scaffold.dart';
 import 'xb_refresh.dart';
-import 'xb_refresh_controller.dart';
 
 class XBRefreshDemo extends XBPage<XBRefreshDemoVM> {
   const XBRefreshDemo({super.key});
@@ -11,6 +9,11 @@ class XBRefreshDemo extends XBPage<XBRefreshDemoVM> {
   @override
   generateVM(BuildContext context) {
     return XBRefreshDemoVM(context: context);
+  }
+
+  @override
+  bool needShowContentFromScreenTop(XBRefreshDemoVM vm) {
+    return true;
   }
 
   @override
@@ -34,18 +37,16 @@ class XBRefreshDemo extends XBPage<XBRefreshDemoVM> {
   Widget buildPage(vm, BuildContext context) {
     return Container(
       height: screenH * 0.8,
-      width: screenW * 0.8,
+      // width: screenW * 0.8,
       color: colors.randColor,
       child: XBRefresh(
         controller: vm.xbRefreshController,
         needLoadMore: true,
         needRefresh: true,
         initRefresh: true,
-        // needShowComplete: true,
-        // needShowHasMoreFooter: true,
 
         ///开始加载更多的回调
-        onBeginLoadMore: () {
+        onLoadMore: () {
           Future.delayed(const Duration(seconds: 2), () {
             bool hasMore = false;
             if (vm.itemCount < 20) {
@@ -58,7 +59,7 @@ class XBRefreshDemo extends XBPage<XBRefreshDemoVM> {
             vm.xbRefreshController.endLoadMore(hasMore);
           });
         },
-        onBeginRefresh: () {
+        onRefresh: () {
           Future.delayed(const Duration(seconds: 1), () {
             vm.itemCount = 10;
             vm.xbRefreshController.endRefresh();

@@ -12,8 +12,8 @@ export 'xb_refresh_controller.dart';
 
 class XBRefresh extends StatefulWidget {
   final Widget child;
-  final VoidCallback? onBeginRefresh;
-  final VoidCallback? onBeginLoadMore;
+  final VoidCallback? onRefresh;
+  final VoidCallback? onLoadMore;
   final XBRefreshBuilder? headerBeforeBuilder;
   final XBRefreshBuilder? headerReadyBuilder;
   final XBRefreshBuilder? headerLoadingBuilder;
@@ -24,7 +24,7 @@ class XBRefresh extends StatefulWidget {
   final XBRefreshBuilder? footerNoMoreBuilder;
   final XBRefreshBuilder? footerHasMoreBuilder;
   final bool needShowHasMoreFooter;
-  final bool needShowComplete;
+  final bool needShowRefreshComplete;
   final double headerLoadingOffset;
   final double footerLoadingOffset;
   final bool needRefresh;
@@ -35,14 +35,14 @@ class XBRefresh extends StatefulWidget {
   const XBRefresh(
       {required this.controller,
       required this.child,
-      this.onBeginRefresh,
+      this.onRefresh,
       this.headerBeforeBuilder,
       this.headerReadyBuilder,
       this.headerLoadingBuilder,
       this.headerCompleteBuilder,
       this.headerLoadingOffset = 50.0,
-      this.needShowComplete = false,
-      this.onBeginLoadMore,
+      this.needShowRefreshComplete = false,
+      this.onLoadMore,
       this.footerBeforeBuilder,
       this.footerReadyBuilder,
       this.footerNoMoreBuilder,
@@ -54,7 +54,11 @@ class XBRefresh extends StatefulWidget {
       this.needLoadMore = true,
       this.initRefresh = false,
       Key? key})
-      : super(key: key);
+      : assert(!needRefresh || onRefresh != null,
+            "needRefresh为true时，onRefresh不能为空"),
+        assert(!needLoadMore || onLoadMore != null,
+            "needLoadMore为true时，onLoadMore不能为空"),
+        super(key: key);
 
   @override
   XBRefreshState createState() => XBRefreshState();
@@ -139,12 +143,12 @@ class XBRefreshState extends State<XBRefresh> {
     return XBRefreshHeader(
       key: controller.refreshKey,
       initRefresh: widget.initRefresh,
-      onBeginRefresh: widget.onBeginRefresh,
+      onBeginRefresh: widget.onRefresh,
       headerBeforeBuilder: widget.headerBeforeBuilder,
       headerReadyBuilder: widget.headerReadyBuilder,
       headerLoadingBuilder: widget.headerLoadingBuilder,
       headerCompleteBuilder: widget.headerCompleteBuilder,
-      needShowComplete: widget.needShowComplete,
+      needShowComplete: widget.needShowRefreshComplete,
       headerLoadingOffset: widget.headerLoadingOffset,
       child: child,
     );
@@ -153,7 +157,7 @@ class XBRefreshState extends State<XBRefresh> {
   _buildFooter(Widget child) {
     return XBRefreshFooter(
       key: controller.loadMoreKey,
-      onBeginLoadMore: widget.onBeginLoadMore,
+      onBeginLoadMore: widget.onLoadMore,
       footerBeforeBuilder: widget.footerBeforeBuilder,
       footerReadyBuilder: widget.footerReadyBuilder,
       footerLoadingBuilder: widget.footerLoadingBuilder,
