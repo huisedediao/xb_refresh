@@ -200,7 +200,9 @@ class XBRefreshState extends State<XBRefresh> {
         physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics()),
         slivers: [
-          SliverToBoxAdapter(child: widget.child),
+          SliverFillRemaining(
+            child: widget.child,
+          )
         ],
       );
     }

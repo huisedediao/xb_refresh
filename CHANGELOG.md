@@ -33,3 +33,7 @@
 ## 0.0.9
 
 - initRefresh的情况下，不延迟调用刷新
+
+## 0.0.10
+
+- child非ScrollView的情况，撑满父容器
