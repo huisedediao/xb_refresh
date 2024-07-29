@@ -6,17 +6,17 @@ import 'xb_refresh_config.dart';
 
 class XBRefreshHeader extends StatefulWidget {
   final Widget child;
-  final VoidCallback? onBeginRefresh;
+  final VoidCallback? onRefresh;
   final XBRefreshBuilder? headerBeforeBuilder;
   final XBRefreshBuilder? headerReadyBuilder;
   final XBRefreshBuilder? headerLoadingBuilder;
   final XBRefreshBuilder? headerCompleteBuilder;
   final bool needShowComplete;
 
-  ///初始状态要不要显示正在刷新
+  /// 初始状态要不要显示正在刷新
   final bool initRefresh;
 
-  ///大于这个值可以刷新,也用于限制header的高度
+  /// 大于这个值可以刷新,也用于限制header的高度
   final double headerLoadingOffset;
 
   /// delay call loadmore
@@ -24,7 +24,7 @@ class XBRefreshHeader extends StatefulWidget {
 
   const XBRefreshHeader(
       {required this.child,
-      this.onBeginRefresh,
+      this.onRefresh,
       this.headerBeforeBuilder,
       this.headerReadyBuilder,
       this.headerLoadingBuilder,
@@ -63,22 +63,26 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
     }
   }
 
-  refresh() {
+  refresh([bool isInitRefresh = false]) {
     if (_headerBuilderVM.state == XBRefreshState.loading) {
       return;
     }
     _isInProcess = true;
     _headerBuilderVM.state = XBRefreshState.loading;
     _headerOffsetVM.top = 0;
-    _callRefresh();
+    _callRefresh(!isInitRefresh);
   }
 
-  _callRefresh() {
-    if (widget.onBeginRefresh != null) {
-      Future.delayed(
-          Duration(milliseconds: widget.delayCallRefreshMilliseconds), () {
-        widget.onBeginRefresh!();
-      });
+  _callRefresh(bool isNeedDelay) {
+    if (widget.onRefresh != null) {
+      if (isNeedDelay) {
+        Future.delayed(
+            Duration(milliseconds: widget.delayCallRefreshMilliseconds), () {
+          widget.onRefresh!();
+        });
+      } else {
+        widget.onRefresh!();
+      }
     }
   }
 
@@ -134,7 +138,7 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
     _headerOffsetVM = XBHeaderPositionVM(-widget.headerLoadingOffset);
 
     if (widget.initRefresh) {
-      refresh();
+      refresh(true);
     }
   }
 
@@ -153,7 +157,7 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
 
               if (_headerBuilderVM.state == XBRefreshState.ready) {
                 _headerBuilderVM.state = XBRefreshState.loading;
-                _callRefresh();
+                _callRefresh(true);
               }
             },
             child: widget.child),

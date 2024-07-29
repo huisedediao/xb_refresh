@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 class XBRefreshFooter extends StatefulWidget {
   final Widget child;
-  final VoidCallback? onBeginLoadMore;
+  final VoidCallback? onLoadMore;
   final XBRefreshBuilder? footerBeforeBuilder;
   final XBRefreshBuilder? footerReadyBuilder;
   final XBRefreshBuilder? footerLoadingBuilder;
@@ -21,7 +21,7 @@ class XBRefreshFooter extends StatefulWidget {
 
   const XBRefreshFooter(
       {required this.child,
-      this.onBeginLoadMore,
+      this.onLoadMore,
       this.footerBeforeBuilder,
       this.footerReadyBuilder,
       this.footerNoMoreBuilder,
@@ -191,12 +191,12 @@ class XBRefreshFooterState extends State<XBRefreshFooter>
               if (_footerBuilderVM.on == XBLoadMoreState.ready) {
                 _footerBuilderVM.on = XBLoadMoreState.loading;
                 _childPaddingVM.bottom = widget.footerLoadingOffset;
-                if (widget.onBeginLoadMore != null) {
+                if (widget.onLoadMore != null) {
                   Future.delayed(
                       Duration(
                           milliseconds: widget.delayCallLoadMoreMilliseconds),
                       () {
-                    widget.onBeginLoadMore!();
+                    widget.onLoadMore!();
                   });
                 }
               }

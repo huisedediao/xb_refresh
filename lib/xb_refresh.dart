@@ -31,7 +31,10 @@ class XBRefresh extends StatefulWidget {
   final double footerLoadingOffset;
   final bool needRefresh;
   final bool needLoadMore;
+
+  /// 初始状态要不要显示正在刷新
   final bool initRefresh;
+
   final XBRefreshController controller;
 
   /// delay call refresh
@@ -216,7 +219,7 @@ class XBRefreshState extends State<XBRefresh> {
     return XBRefreshHeader(
       key: refreshController.refreshKey,
       initRefresh: widget.initRefresh,
-      onBeginRefresh: widget.onRefresh,
+      onRefresh: widget.onRefresh,
       headerBeforeBuilder: widget.headerBeforeBuilder,
       headerReadyBuilder: widget.headerReadyBuilder,
       headerLoadingBuilder: widget.headerLoadingBuilder,
@@ -231,7 +234,7 @@ class XBRefreshState extends State<XBRefresh> {
   _buildFooter(Widget child) {
     return XBRefreshFooter(
       key: refreshController.loadMoreKey,
-      onBeginLoadMore: widget.onLoadMore,
+      onLoadMore: widget.onLoadMore,
       footerBeforeBuilder: widget.footerBeforeBuilder,
       footerReadyBuilder: widget.footerReadyBuilder,
       footerLoadingBuilder: widget.footerLoadingBuilder,
