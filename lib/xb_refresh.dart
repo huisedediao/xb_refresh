@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 library xb_refresh;
 
 import 'xb_refresh_config.dart';
@@ -51,7 +53,7 @@ class XBRefresh extends StatefulWidget {
       this.needShowHasMoreFooter = false,
       this.footerLoadingOffset = 50.0,
       this.needRefresh = true,
-      this.needLoadMore = true,
+      this.needLoadMore = false,
       this.initRefresh = false,
       Key? key})
       : assert(!needRefresh || onRefresh != null,
@@ -65,48 +67,53 @@ class XBRefresh extends StatefulWidget {
 }
 
 class XBRefreshState extends State<XBRefresh> {
-  late XBRefreshController controller;
+  late XBRefreshController refreshController;
 
   bool get childIsScrollView => widget.child is ScrollView;
 
-  late ScrollController _controller;
+  bool get childHasController => _childHasController(widget.child);
+
+  bool _childHasController(Widget child) {
+    if (child is! ScrollView) return false;
+    return child.controller != null;
+  }
+
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    controller = widget.controller;
+    refreshController = widget.controller;
 
     _setupScrollController();
   }
 
   _setupScrollController() {
-    if (childIsScrollView) {
-      final controller = (widget.child as ScrollView).controller;
-      assert(controller != null,
-          "XBRefresh child 为ScrollView的情况，必须有ScrollController");
-      _controller = controller!;
+    if (childHasController) {
+      _scrollController = (widget.child as ScrollView).controller!;
     } else {
-      _controller = ScrollController();
+      _scrollController = ScrollController();
     }
 
-    _controller.addListener(_controllerListen);
+    _scrollController.addListener(_controllerListen);
   }
 
   _controllerListen() {
-    if (controller.refreshKey.currentState != null) {
-      controller.refreshKey.currentState?.receiveOffset(_controller.offset);
+    if (refreshController.refreshKey.currentState != null) {
+      refreshController.refreshKey.currentState
+          ?.receiveOffset(_scrollController.offset);
     }
-    if (controller.loadMoreKey.currentState != null) {
-      controller.loadMoreKey.currentState?.receiveOffset(
-          _controller.offset, _controller.position.maxScrollExtent);
+    if (refreshController.loadMoreKey.currentState != null) {
+      refreshController.loadMoreKey.currentState?.receiveOffset(
+          _scrollController.offset, _scrollController.position.maxScrollExtent);
     }
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_controllerListen);
-    if (childIsScrollView == false) {
-      _controller.dispose();
+    _scrollController.removeListener(_controllerListen);
+    if (childHasController == false) {
+      _scrollController.dispose();
     }
     super.dispose();
   }
@@ -116,9 +123,9 @@ class XBRefreshState extends State<XBRefresh> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.child != widget.child) {
       /// 移除监听
-      _controller.removeListener(_controllerListen);
-      if (oldWidget.child is! ScrollView) {
-        _controller.dispose();
+      _scrollController.removeListener(_controllerListen);
+      if (_childHasController(oldWidget.child) == false) {
+        _scrollController.dispose();
       }
       _setupScrollController();
     }
@@ -129,16 +136,56 @@ class XBRefreshState extends State<XBRefresh> {
     Widget child;
 
     if (childIsScrollView) {
-      child = ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(
+      if (childHasController) {
+        child = ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(
+            physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics()),
+          ),
+          child: widget.child,
+        );
+      } else {
+        ScrollView childView = widget.child as ScrollView;
+        List<Widget>? slivers;
+
+        if (childView is BoxScrollView) {
+          Widget sliver = childView.buildChildLayout(context);
+          if (childView.padding != null) {
+            slivers = [
+              SliverPadding(
+                sliver: sliver,
+                padding: childView.padding!,
+              )
+            ];
+          } else {
+            slivers = [sliver];
+          }
+        } else {
+          slivers = List.from(childView.buildSlivers(context), growable: true);
+        }
+
+        child = CustomScrollView(
+          controller: _scrollController,
+          cacheExtent: childView.cacheExtent,
+          key: childView.key,
+          scrollDirection: childView.scrollDirection,
+          semanticChildCount: childView.semanticChildCount,
+          primary: childView.primary,
+          clipBehavior: childView.clipBehavior,
+          keyboardDismissBehavior: childView.keyboardDismissBehavior,
+          anchor: childView.anchor,
+          restorationId: childView.restorationId,
+          center: childView.center,
           physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics()),
-        ),
-        child: widget.child,
-      );
+          slivers: slivers,
+          dragStartBehavior: childView.dragStartBehavior,
+          reverse: childView.reverse,
+        );
+      }
     } else {
       child = CustomScrollView(
-        controller: _controller,
+        controller: _scrollController,
         physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics()),
         slivers: [
@@ -159,7 +206,7 @@ class XBRefreshState extends State<XBRefresh> {
 
   _buildHeader(Widget child) {
     return XBRefreshHeader(
-      key: controller.refreshKey,
+      key: refreshController.refreshKey,
       initRefresh: widget.initRefresh,
       onBeginRefresh: widget.onRefresh,
       headerBeforeBuilder: widget.headerBeforeBuilder,
@@ -174,7 +221,7 @@ class XBRefreshState extends State<XBRefresh> {
 
   _buildFooter(Widget child) {
     return XBRefreshFooter(
-      key: controller.loadMoreKey,
+      key: refreshController.loadMoreKey,
       onBeginLoadMore: widget.onLoadMore,
       footerBeforeBuilder: widget.footerBeforeBuilder,
       footerReadyBuilder: widget.footerReadyBuilder,

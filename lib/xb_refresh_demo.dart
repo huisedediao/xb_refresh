@@ -35,75 +35,78 @@ class XBRefreshDemo extends XBPage<XBRefreshDemoVM> {
 
   @override
   Widget buildPage(vm, BuildContext context) {
-    return Container(
-      height: screenH * 0.8,
-      // width: screenW * 0.8,
-      color: colors.randColor,
-      child: XBRefresh(
-        controller: vm.xbRefreshController,
-        needLoadMore: true,
-        needRefresh: true,
-        initRefresh: true,
+    return Padding(
+      padding: EdgeInsets.only(top: topBarH),
+      child: Container(
+        height: screenH * 0.8,
+        width: screenW * 0.8,
+        color: colors.randColor,
+        child: XBRefresh(
+          controller: vm.xbRefreshController,
+          needLoadMore: true,
+          needRefresh: true,
+          initRefresh: true,
 
-        ///开始加载更多的回调
-        onLoadMore: () {
-          Future.delayed(const Duration(seconds: 2), () {
-            bool hasMore = false;
-            if (vm.itemCount < 20) {
-              hasMore = true;
-              vm.itemCount += 2;
-              vm.notify();
-            }
+          ///开始加载更多的回调
+          onLoadMore: () {
+            Future.delayed(const Duration(seconds: 2), () {
+              bool hasMore = false;
+              if (vm.itemCount < 20) {
+                hasMore = true;
+                vm.itemCount += 2;
+                vm.notify();
+              }
 
-            ///结束加载更多，传是否有新数据
-            vm.xbRefreshController.endLoadMore(hasMore);
-          });
-        },
-        onRefresh: () {
-          Future.delayed(const Duration(seconds: 1), () {
-            vm.itemCount = 10;
-            vm.xbRefreshController.endRefresh();
-            vm.notify();
-          });
-        },
-        headerCompleteBuilder: (height) {
-          return Container(
-            height: height,
-            color: Colors.red,
-            child: const Center(
-              child: Text("完成刷新"),
-            ),
-          );
-        },
-        footerHasMoreBuilder: (height) {
-          return Container(
-            height: height,
-            color: Colors.green,
-            child: const Center(
-              child: Text("拉取新数据完成"),
-            ),
-          );
-        },
-        // child: CustomScrollView(
-        //   controller: _controller,
-        //   slivers: <Widget>[
-        //     SliverList(
-        //         delegate: SliverChildBuilderDelegate((ctx, index) {
-        //       return Cell("$index", () {});
-        //     }, childCount: _itemCount))
-        //   ],
-        // )
-        child: ListView.builder(
-          controller: vm.controller,
-          itemCount: vm.itemCount,
-          itemBuilder: (context, index) {
-            return Cell("$index", () {});
+              ///结束加载更多，传是否有新数据
+              vm.xbRefreshController.endLoadMore(hasMore);
+            });
           },
+          onRefresh: () {
+            Future.delayed(const Duration(seconds: 1), () {
+              vm.itemCount = 10;
+              vm.xbRefreshController.endRefresh();
+              vm.notify();
+            });
+          },
+          headerCompleteBuilder: (height) {
+            return Container(
+              height: height,
+              color: Colors.red,
+              child: const Center(
+                child: Text("完成刷新"),
+              ),
+            );
+          },
+          footerHasMoreBuilder: (height) {
+            return Container(
+              height: height,
+              color: Colors.green,
+              child: const Center(
+                child: Text("拉取新数据完成"),
+              ),
+            );
+          },
+          // child: CustomScrollView(
+          //   controller: _controller,
+          //   slivers: <Widget>[
+          //     SliverList(
+          //         delegate: SliverChildBuilderDelegate((ctx, index) {
+          //       return Cell("$index", () {});
+          //     }, childCount: _itemCount))
+          //   ],
+          // )
+          child: ListView.builder(
+            // controller: vm.controller,
+            itemCount: vm.itemCount,
+            itemBuilder: (context, index) {
+              return Cell("$index", () {});
+            },
+          ),
+          // child: Container(
+          //   height: screenH * 0.5,
+          //   color: colors.randColor,
+          // ),
         ),
-        // child: Container(
-        //   height: screenH * 0.5,
-        //   color: colors.randColor,
-        // ),
       ),
     );
   }

@@ -17,3 +17,7 @@
 ## 0.0.5
 
 - bug fixed
+
+## 0.0.6
+
+- 去除child为ScrollView时必须有ScrollController的限制
