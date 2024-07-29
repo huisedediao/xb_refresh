@@ -21,3 +21,7 @@
 ## 0.0.6
 
 - 去除child为ScrollView时必须有ScrollController的限制
+
+## 0.0.7
+
+- 增加延迟调用加载更多参数
