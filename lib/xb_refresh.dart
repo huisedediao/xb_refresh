@@ -34,8 +34,11 @@ class XBRefresh extends StatefulWidget {
   final bool initRefresh;
   final XBRefreshController controller;
 
+  /// delay call refresh
+  final int delayCallRefreshMilliseconds;
+
   /// delay call loadmore
-  final int delayCallLoadMilliseconds;
+  final int delayCallLoadMoreMilliseconds;
 
   const XBRefresh(
       {required this.controller,
@@ -58,7 +61,8 @@ class XBRefresh extends StatefulWidget {
       this.needRefresh = true,
       this.needLoadMore = false,
       this.initRefresh = false,
-      this.delayCallLoadMilliseconds = 0,
+      this.delayCallRefreshMilliseconds = 0,
+      this.delayCallLoadMoreMilliseconds = 0,
       Key? key})
       : assert(!needRefresh || onRefresh != null,
             "needRefresh为true时，onRefresh不能为空"),
@@ -219,6 +223,7 @@ class XBRefreshState extends State<XBRefresh> {
       headerCompleteBuilder: widget.headerCompleteBuilder,
       needShowComplete: widget.needShowRefreshComplete,
       headerLoadingOffset: widget.headerLoadingOffset,
+      delayCallRefreshMilliseconds: widget.delayCallRefreshMilliseconds,
       child: child,
     );
   }
@@ -234,7 +239,7 @@ class XBRefreshState extends State<XBRefresh> {
       footerHasMoreBuilder: widget.footerHasMoreBuilder,
       needShowHasMoreFooter: widget.needShowHasMoreFooter,
       footerLoadingOffset: widget.footerLoadingOffset,
-      delayCallLoadMilliseconds: widget.delayCallLoadMilliseconds,
+      delayCallLoadMoreMilliseconds: widget.delayCallLoadMoreMilliseconds,
       child: child,
     );
   }

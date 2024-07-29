@@ -14,7 +14,7 @@ class XBRefreshFooter extends StatefulWidget {
   final bool needShowHasMoreFooter;
 
   /// delay call loadmore
-  final int delayCallLoadMilliseconds;
+  final int delayCallLoadMoreMilliseconds;
 
   ///大于这个值可以加载更多,也用于限制footer的高度
   final double footerLoadingOffset;
@@ -29,7 +29,7 @@ class XBRefreshFooter extends StatefulWidget {
       this.footerLoadingBuilder,
       this.needShowHasMoreFooter = false,
       this.footerLoadingOffset = 50.0,
-      this.delayCallLoadMilliseconds = 0,
+      this.delayCallLoadMoreMilliseconds = 0,
       Key? key})
       : super(key: key);
 
@@ -193,7 +193,8 @@ class XBRefreshFooterState extends State<XBRefreshFooter>
                 _childPaddingVM.bottom = widget.footerLoadingOffset;
                 if (widget.onBeginLoadMore != null) {
                   Future.delayed(
-                      Duration(milliseconds: widget.delayCallLoadMilliseconds),
+                      Duration(
+                          milliseconds: widget.delayCallLoadMoreMilliseconds),
                       () {
                     widget.onBeginLoadMore!();
                   });

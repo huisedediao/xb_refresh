@@ -19,6 +19,9 @@ class XBRefreshHeader extends StatefulWidget {
   ///大于这个值可以刷新,也用于限制header的高度
   final double headerLoadingOffset;
 
+  /// delay call loadmore
+  final int delayCallRefreshMilliseconds;
+
   const XBRefreshHeader(
       {required this.child,
       this.onBeginRefresh,
@@ -29,6 +32,7 @@ class XBRefreshHeader extends StatefulWidget {
       this.headerLoadingOffset = 60.0,
       this.needShowComplete = false,
       this.initRefresh = false,
+      this.delayCallRefreshMilliseconds = 0,
       Key? key})
       : super(key: key);
 
@@ -66,8 +70,15 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
     _isInProcess = true;
     _headerBuilderVM.state = XBRefreshState.loading;
     _headerOffsetVM.top = 0;
+    _callRefresh();
+  }
+
+  _callRefresh() {
     if (widget.onBeginRefresh != null) {
-      widget.onBeginRefresh!();
+      Future.delayed(
+          Duration(milliseconds: widget.delayCallRefreshMilliseconds), () {
+        widget.onBeginRefresh!();
+      });
     }
   }
 
@@ -142,9 +153,7 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
 
               if (_headerBuilderVM.state == XBRefreshState.ready) {
                 _headerBuilderVM.state = XBRefreshState.loading;
-                if (widget.onBeginRefresh != null) {
-                  widget.onBeginRefresh!();
-                }
+                _callRefresh();
               }
             },
             child: widget.child),
