@@ -1,6 +1,6 @@
 name: xb_refresh
 description: "高自由度的上下拉刷新控件."
-version: 0.0.10
+version: 0.0.11
 homepage: https://github.com/huisedediao/xb_refresh.git
 
 environment:
@@ -10,9 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
-  provider: ^6.1.2
-  xb_scaffold: ^0.0.111
 
 dev_dependencies:
   flutter_test:

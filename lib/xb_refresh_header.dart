@@ -1,7 +1,4 @@
-// ignore_for_file: sized_box_for_whitespace, deprecated_member_use
-
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 import 'xb_refresh_config.dart';
 
 class XBRefreshHeader extends StatefulWidget {
@@ -42,8 +39,8 @@ class XBRefreshHeader extends StatefulWidget {
 
 class XBRefreshHeaderState extends State<XBRefreshHeader>
     with SingleTickerProviderStateMixin {
-  late XBHeaderBuilderVM _headerBuilderVM;
-  late XBHeaderPositionVM _headerOffsetVM;
+  XBRefreshState _headerState = XBRefreshState.before;
+  double _headerTopPadding = 0.0;
   bool _isUserAction = false;
   double _lastOffset = 0;
   bool _isInProcess = false;
@@ -51,9 +48,11 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
 
   ///结束刷新
   endRefresh() {
-    if (_headerBuilderVM.state == XBRefreshState.loading) {
+    if (_headerState == XBRefreshState.loading) {
       if (widget.needShowComplete) {
-        _headerBuilderVM.state = XBRefreshState.complete;
+        setState(() {
+          _headerState = XBRefreshState.complete;
+        });
         Future.delayed(const Duration(seconds: 1), () {
           _afterComplete();
         });
@@ -64,12 +63,14 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
   }
 
   refresh([bool isInitRefresh = false]) {
-    if (_headerBuilderVM.state == XBRefreshState.loading) {
+    if (_headerState == XBRefreshState.loading) {
       return;
     }
-    _isInProcess = true;
-    _headerBuilderVM.state = XBRefreshState.loading;
-    _headerOffsetVM.top = 0;
+    setState(() {
+      _isInProcess = true;
+      _headerState = XBRefreshState.loading;
+      _headerTopPadding = 0;
+    });
     _callRefresh(!isInitRefresh);
   }
 
@@ -91,16 +92,14 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
     _lastOffset = offset;
 
     if (offset < 0) {
-      ///已完成刷新但是还在流程里，说明没有等到非用户操作的offset = 0
       if (_isCompleted && _isInProcess) return;
 
       if (_isInProcess == false && _isUserAction) {
-        ///进入流程
         _isInProcess = true;
       }
 
-      if (_headerBuilderVM.state == XBRefreshState.loading ||
-          _headerBuilderVM.state == XBRefreshState.complete) {
+      if (_headerState == XBRefreshState.loading ||
+          _headerState == XBRefreshState.complete) {
         return;
       }
 
@@ -112,13 +111,17 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
       if (top > 0) {
         top = 0;
       }
-      _headerOffsetVM.top = top;
+      setState(() {
+        _headerTopPadding = top;
+      });
 
       if (upward) {
         if (_isUserAction) {
           _headerUserActionRun(fitOffset);
         } else {
-          _headerBuilderVM.state = XBRefreshState.before;
+          setState(() {
+            _headerState = XBRefreshState.before;
+          });
         }
       } else {
         if (_isUserAction) {
@@ -133,9 +136,7 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
   @override
   void initState() {
     super.initState();
-
-    _headerBuilderVM = XBHeaderBuilderVM();
-    _headerOffsetVM = XBHeaderPositionVM(-widget.headerLoadingOffset);
+    _headerTopPadding = -widget.headerLoadingOffset;
 
     if (widget.initRefresh) {
       refresh(true);
@@ -147,69 +148,42 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
     return Stack(
       children: <Widget>[
         Listener(
-            onPointerDown: (detail) {
-              _isUserAction = true;
-            },
-            onPointerUp: (detail) {
-              _isUserAction = false;
-
-              _endProcessIfPossible();
-
-              if (_headerBuilderVM.state == XBRefreshState.ready) {
-                _headerBuilderVM.state = XBRefreshState.loading;
-                _callRefresh(true);
-              }
-            },
-            child: widget.child),
-        ChangeNotifierProvider(
-          create: (ctx) {
-            return _headerBuilderVM;
+          onPointerDown: (detail) {
+            _isUserAction = true;
           },
-          child: Consumer(builder: (ctx, XBHeaderBuilderVM vm, child) {
-            Widget child;
-            if (vm.state == XBRefreshState.before) {
-              child = _headerBeforeDispaly();
-            } else if (vm.state == XBRefreshState.ready) {
-              child = _headerReadyDispaly();
-            } else if (vm.state == XBRefreshState.loading) {
-              child = _headerLoadingDispaly();
-            } else if (vm.state == XBRefreshState.complete) {
-              child = _headerCompleteDispaly();
-            } else {
-              child = Container();
+          onPointerUp: (detail) {
+            _isUserAction = false;
+
+            _endProcessIfPossible();
+
+            if (_headerState == XBRefreshState.ready) {
+              setState(() {
+                _headerState = XBRefreshState.loading;
+              });
+              _callRefresh(true);
             }
-            return ChangeNotifierProvider(
-              create: (ctx) {
-                return _headerOffsetVM;
-              },
-              child: Consumer(
-                builder: (ctx, XBHeaderPositionVM vm, reChild) {
-                  return Positioned(
-                    top: vm.top,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      //                        color: Colors.grey,
-                      height: widget.headerLoadingOffset,
-                      child: reChild,
-                    ),
-                  );
-                },
-                child: child,
-              ),
-            );
-          }),
+          },
+          child: widget.child,
+        ),
+        Positioned(
+          top: _headerTopPadding,
+          left: 0,
+          right: 0,
+          child: SizedBox(
+            height: widget.headerLoadingOffset,
+            child: _buildHeaderContent(),
+          ),
         ),
       ],
     );
   }
 
   _afterComplete() {
-    _headerBuilderVM.state = XBRefreshState.before;
-    if (_headerOffsetVM.top != -widget.headerLoadingOffset) {
-      _headerOffsetVM.top = -widget.headerLoadingOffset;
-    }
-    _isCompleted = true;
+    setState(() {
+      _headerState = XBRefreshState.before;
+      _headerTopPadding = -widget.headerLoadingOffset;
+      _isCompleted = true;
+    });
     _endProcessIfPossible();
   }
 
@@ -218,20 +192,48 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
         _lastOffset >= 0 &&
         _isInProcess == true &&
         _isCompleted == true) {
-      _isInProcess = false;
-      _isCompleted = false;
+      setState(() {
+        _isInProcess = false;
+        _isCompleted = false;
+      });
     }
   }
 
   _headerUserActionRun(double fitOffset) {
     if (fitOffset >= widget.headerLoadingOffset) {
-      _headerBuilderVM.state = XBRefreshState.ready;
+      setState(() {
+        _headerState = XBRefreshState.ready;
+      });
     } else {
-      _headerBuilderVM.state = XBRefreshState.before;
+      setState(() {
+        _headerState = XBRefreshState.before;
+      });
     }
   }
 
-  Widget _headerBeforeDispaly() {
+  Widget _buildHeaderContent() {
+    Widget child;
+    switch (_headerState) {
+      case XBRefreshState.before:
+        child = _headerBeforeDisplay();
+        break;
+      case XBRefreshState.ready:
+        child = _headerReadyDisplay();
+        break;
+      case XBRefreshState.loading:
+        child = _headerLoadingDisplay();
+        break;
+      case XBRefreshState.complete:
+        child = _headerCompleteDisplay();
+        break;
+      default:
+        child = Container();
+        break;
+    }
+    return child;
+  }
+
+  Widget _headerBeforeDisplay() {
     Widget child;
     if (widget.headerBeforeBuilder != null) {
       child = widget.headerBeforeBuilder!(widget.headerLoadingOffset);
@@ -240,13 +242,12 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
     }
 
     return Container(
-        // color: Colors.orange,
         alignment: Alignment.center,
         height: widget.headerLoadingOffset,
         child: child);
   }
 
-  Widget _headerReadyDispaly() {
+  Widget _headerReadyDisplay() {
     Widget child;
     if (widget.headerReadyBuilder != null) {
       child = widget.headerReadyBuilder!(widget.headerLoadingOffset);
@@ -254,13 +255,12 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
       child = _buildArrow(true);
     }
     return Container(
-//        color: Colors.orange,
         alignment: Alignment.center,
         height: widget.headerLoadingOffset,
         child: child);
   }
 
-  Widget _headerLoadingDispaly() {
+  Widget _headerLoadingDisplay() {
     Widget child;
     if (widget.headerLoadingBuilder != null) {
       child = widget.headerLoadingBuilder!(widget.headerLoadingOffset);
@@ -268,13 +268,12 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
       child = _buildActivityIndicator();
     }
     return Container(
-//        color: Colors.orange,
         alignment: Alignment.center,
         height: widget.headerLoadingOffset,
         child: child);
   }
 
-  Widget _headerCompleteDispaly() {
+  Widget _headerCompleteDisplay() {
     Widget child;
     if (widget.headerCompleteBuilder != null) {
       child = widget.headerCompleteBuilder!(widget.headerLoadingOffset);
@@ -282,7 +281,6 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
       child = _buildActivityIndicator();
     }
     return Container(
-//        color: Colors.orange,
         alignment: Alignment.center,
         height: widget.headerLoadingOffset,
         child: child);
@@ -315,29 +313,5 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
                 animating: animating,
               ))),
     );
-  }
-}
-
-class XBHeaderPositionVM extends ChangeNotifier {
-  double _top;
-
-  double get top => _top;
-
-  set top(double offset) {
-    _top = offset;
-    notifyListeners();
-  }
-
-  XBHeaderPositionVM(this._top);
-}
-
-class XBHeaderBuilderVM extends ChangeNotifier {
-  XBRefreshState _state = XBRefreshState.before;
-
-  XBRefreshState get state => _state;
-
-  set state(XBRefreshState on) {
-    _state = on;
-    notifyListeners();
   }
 }

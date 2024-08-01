@@ -20,7 +20,9 @@ class MyApp extends StatelessWidget {
       navigatorObservers: [xbRouteObserver],
       home: const XBScaffold(
           imgPrefixs: ["assets/images/default/", "assets/images/custom/"],
-          child: Home()),
+          child: Scaffold(
+            body: Home(),
+          )),
     );
   }
 }
