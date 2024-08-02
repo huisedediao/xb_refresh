@@ -35,6 +35,9 @@ class XBRefresh extends StatefulWidget {
   /// 初始状态要不要显示正在刷新
   final bool initRefresh;
 
+  /// 初始状态显示刷新的情况下，要不要延迟调用刷新回调
+  final bool initRefreshDelay;
+
   final XBRefreshController controller;
 
   /// delay call refresh
@@ -64,6 +67,7 @@ class XBRefresh extends StatefulWidget {
       this.needRefresh = true,
       this.needLoadMore = false,
       this.initRefresh = false,
+      this.initRefreshDelay = true,
       this.delayCallRefreshMilliseconds = 0,
       this.delayCallLoadMoreMilliseconds = 0,
       Key? key})
@@ -221,6 +225,7 @@ class XBRefreshState extends State<XBRefresh> {
     return XBRefreshHeader(
       key: refreshController.refreshKey,
       initRefresh: widget.initRefresh,
+      initRefreshDelay: widget.initRefreshDelay,
       onRefresh: widget.onRefresh,
       headerBeforeBuilder: widget.headerBeforeBuilder,
       headerReadyBuilder: widget.headerReadyBuilder,

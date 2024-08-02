@@ -13,6 +13,9 @@ class XBRefreshHeader extends StatefulWidget {
   /// 初始状态要不要显示正在刷新
   final bool initRefresh;
 
+  /// 初始状态显示刷新的情况下，要不要延迟调用刷新回调
+  final bool initRefreshDelay;
+
   /// 大于这个值可以刷新,也用于限制header的高度
   final double headerLoadingOffset;
 
@@ -29,6 +32,7 @@ class XBRefreshHeader extends StatefulWidget {
       this.headerLoadingOffset = 60.0,
       this.needShowComplete = false,
       this.initRefresh = false,
+      this.initRefreshDelay = true,
       this.delayCallRefreshMilliseconds = 0,
       Key? key})
       : super(key: key);
@@ -71,7 +75,7 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
       _headerState = XBRefreshState.loading;
       _headerTopPadding = 0;
     });
-    _callRefresh(!isInitRefresh);
+    _callRefresh(!isInitRefresh || widget.initRefreshDelay);
   }
 
   _callRefresh(bool isNeedDelay) {
