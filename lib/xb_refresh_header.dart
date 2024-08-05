@@ -66,6 +66,8 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
     }
   }
 
+  bool get isInProcess => _isInProcess;
+
   refresh([bool isInitRefresh = false]) {
     if (_headerState == XBRefreshState.loading) {
       return;
@@ -77,6 +79,10 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
     });
     _callRefresh(!isInitRefresh || widget.initRefreshDelay);
   }
+
+  /// 供外部使用
+  /// 立即调用刷新函数
+  callRefresh() => _callRefresh(false);
 
   _callRefresh(bool isNeedDelay) {
     if (widget.onRefresh != null) {

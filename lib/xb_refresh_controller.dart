@@ -6,19 +6,24 @@ class XBRefreshController {
   final GlobalKey<XBRefreshFooterState> loadMoreKey = GlobalKey();
   final GlobalKey<XBRefreshHeaderState> refreshKey = GlobalKey();
 
+  int _refreshSemaphore = 0;
+
   refresh() {
-    refreshKey.currentState?.refresh();
+    if (refreshKey.currentState?.isInProcess ?? false) {
+      _refreshSemaphore++;
+    } else {
+      refreshKey.currentState?.refresh();
+    }
   }
 
   endRefresh() {
-    if (refreshKey.currentState != null) {
+    if (_refreshSemaphore > 0) {
+      refreshKey.currentState?.callRefresh();
+      _refreshSemaphore--;
+    } else {
       refreshKey.currentState?.endRefresh();
     }
   }
 
-  endLoadMore(bool hasMore) {
-    if (loadMoreKey.currentState != null) {
-      loadMoreKey.currentState?.endLoadMore(hasMore);
-    }
-  }
+  endLoadMore(bool hasMore) => loadMoreKey.currentState?.endLoadMore(hasMore);
 }
