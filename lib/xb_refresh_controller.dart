@@ -8,8 +8,10 @@ class XBRefreshController {
 
   int _refreshSemaphore = 0;
 
+  bool get isRefreshing => refreshKey.currentState?.isInProcess ?? false;
+
   refresh() {
-    if (refreshKey.currentState?.isInProcess ?? false) {
+    if (isRefreshing) {
       _refreshSemaphore++;
     } else {
       refreshKey.currentState?.refresh();
