@@ -12,7 +12,9 @@ class XBRefreshController {
 
   refresh() {
     if (isRefreshing) {
-      _refreshSemaphore++;
+      if (_refreshSemaphore == 0) {
+        _refreshSemaphore++;
+      }
     } else {
       refreshKey.currentState?.refresh();
     }
