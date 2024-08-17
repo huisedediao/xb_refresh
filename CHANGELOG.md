@@ -57,3 +57,7 @@
 ## 0.0.15
 
 - optimized
+
+## 0.0.16
+
+- optimized
