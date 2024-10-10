@@ -201,7 +201,7 @@ class XBRefreshHeaderState extends State<XBRefreshHeader>
     if (_isUserAction == false &&
         _lastOffset >= 0 &&
         _isInProcess == true &&
-        _isCompleted == true) {
+        (_isCompleted == true || _headerState == XBRefreshState.before)) {
       setState(() {
         _isInProcess = false;
         _isCompleted = false;
