@@ -84,13 +84,16 @@ class XBRefresh extends StatefulWidget {
 class XBRefreshState extends State<XBRefresh> {
   late XBRefreshController refreshController;
 
-  bool get childIsScrollView => widget.child is ScrollView;
-
   bool get childHasController => _childHasController(widget.child);
 
   bool _childHasController(Widget child) {
-    if (child is! ScrollView) return false;
-    return child.controller != null;
+    if (child is ScrollView) {
+      return child.controller != null;
+    }
+    if (child is SingleChildScrollView) {
+      return child.controller != null;
+    }
+    return false;
   }
 
   late ScrollController _scrollController;
@@ -105,7 +108,11 @@ class XBRefreshState extends State<XBRefresh> {
 
   _setupScrollController() {
     if (childHasController) {
-      _scrollController = (widget.child as ScrollView).controller!;
+      if (widget.child is ScrollView) {
+        _scrollController = (widget.child as ScrollView).controller!;
+      } else if (widget.child is SingleChildScrollView) {
+        _scrollController = (widget.child as SingleChildScrollView).controller!;
+      }
     } else {
       _scrollController = ScrollController();
     }
@@ -150,7 +157,28 @@ class XBRefreshState extends State<XBRefresh> {
   Widget build(BuildContext context) {
     Widget child;
 
-    if (childIsScrollView) {
+    if (widget.child is SingleChildScrollView) {
+      final scsv = widget.child as SingleChildScrollView;
+      child = CustomScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics()),
+        scrollDirection: scsv.scrollDirection,
+        reverse: scsv.reverse,
+        primary: scsv.primary,
+        dragStartBehavior: scsv.dragStartBehavior,
+        restorationId: scsv.restorationId,
+        slivers: [
+          SliverPadding(
+            padding: scsv.padding ?? EdgeInsets.zero,
+            sliver: SliverList(
+              delegate:
+                  SliverChildListDelegate([scsv.child ?? const SizedBox()]),
+            ),
+          ),
+        ],
+      );
+    } else if (widget.child is ScrollView) {
       if (childHasController) {
         child = ScrollConfiguration(
           behavior: ScrollConfiguration.of(context).copyWith(

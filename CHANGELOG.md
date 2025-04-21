@@ -65,3 +65,7 @@
 ## 0.0.17
 
 - optimized
+
+## 0.0.18
+
+- 新增对SingleChildScrollView的支持

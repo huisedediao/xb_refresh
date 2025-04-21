@@ -93,18 +93,30 @@ class _HomeState extends State<Home> {
           //     }, childCount: _itemCount))
           //   ],
           // )
-          child: ListView.builder(
-            // controller: controller,
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              return Container(
-                  height: 50, color: colors.randColor, child: Text("$index"));
-            },
-          ),
+          // child: ListView.builder(
+          //   // controller: controller,
+          //   itemCount: itemCount,
+          //   itemBuilder: (context, index) {
+          //     return Container(
+          //         height: 50, color: colors.randColor, child: Text("$index"));
+          //   },
+          // ),
           // child: Container(
           //   height: screenH * 0.5,
           //   color: colors.randColor,
           // ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: List.generate(itemCount, (index) {
+                return Container(
+                  height: 50,
+                  width: screenW,
+                  color: colors.randColor,
+                  child: Text("$index"),
+                );
+              }),
+            ),
+          ),
         ),
       ),
     );

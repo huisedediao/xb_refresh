@@ -1,6 +1,6 @@
 name: xb_refresh
 description: "高自由度的上下拉刷新控件."
-version: 0.0.17
+version: 0.0.18
 homepage: https://github.com/huisedediao/xb_refresh.git
 
 environment:
